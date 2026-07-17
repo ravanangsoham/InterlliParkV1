@@ -4,13 +4,11 @@ import { motion } from 'motion/react';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
-  sendPasswordResetEmail,
-  signInWithPopup,
-  GoogleAuthProvider
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { ArrowLeft, User, Mail, Lock, Sparkles, Loader2, Chrome } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Sparkles, Loader2 } from 'lucide-react';
 import { DEVELOPER_EMAILS } from '../constants';
 
 export default function Auth() {
@@ -50,52 +48,6 @@ export default function Auth() {
       const fixed = `${email.split('@')[0]}@${suggestion}`;
       setEmail(fixed);
       setTypoWarning('');
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const normalizedEmail = user.email?.toLowerCase().trim() || '';
-      const isDeveloper = DEVELOPER_EMAILS.includes(normalizedEmail);
-      
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      const assignedRole = (role === 'admin' || isDeveloper) ? 'admin' : 'user';
-
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          email: normalizedEmail,
-          role: assignedRole,
-          isBlocked: false,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      } else if (isDeveloper && userDoc.data()?.role !== 'admin') {
-        await updateDoc(userDocRef, { role: 'admin', updatedAt: serverTimestamp() });
-      }
-
-      navigate(assignedRole === 'admin' ? '/admin' : '/');
-    } catch (err: any) {
-      // Don't log or show an error if the user closed the popup - it's expected behavior
-      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-by-user') {
-        setLoading(false);
-        return;
-      }
-      
-      if (err.code === 'auth/unauthorized-domain') {
-        setError('Google Sign-In is restricted to the AI Studio preview window. To use it in a separate tab, you must configure your own Firebase project.');
-      } else {
-        console.error('Google Auth Error:', err);
-        setError(err.message || 'Identity verification sequence failed.');
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -296,24 +248,6 @@ export default function Auth() {
               ? `Authorized entry into ${role} sector` 
               : `Sequencing new ${role} hash in the grid`}
           </p>
-        </div>
-
-        <button 
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="w-full h-18 bg-white text-black hover:bg-brand-primary rounded-[2rem] font-black flex items-center justify-center gap-5 transition-all active:scale-95 mb-10 group shadow-2xl shadow-brand-primary/20"
-        >
-          <Chrome size={28} className="text-black group-hover:scale-110 transition-transform" />
-          <span className="tracking-tight text-lg">Access with Google Grid</span>
-        </button>
-
-        <div className="relative mb-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/5"></div>
-          </div>
-          <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-[0.3em]">
-            <span className="bg-background-deep px-4 text-slate-500">Or use Hash Key</span>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

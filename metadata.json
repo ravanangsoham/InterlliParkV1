@@ -1,0 +1,13 @@
+{
+  "name": "IntelliPark",
+  "description": "An AI-powered smart parking system with efficient slot allocation, real-time visualization, and administrative controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API",
+    "AI-Powered Slot Allocation",
+    "Real-time Parking Grid",
+    "Admin Controls & Analytics",
+    "Secure Authentication",
+    "UPI Payment Simulation"
+  ]
+}

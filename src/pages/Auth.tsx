@@ -87,9 +87,13 @@ export default function Auth() {
         setLoading(false);
         return;
       }
-
-      console.error('Google Auth Error:', err);
-      setError(err.message || 'Identity verification sequence failed.');
+      
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Google Sign-In is restricted to the AI Studio preview window. To use it in a separate tab, you must configure your own Firebase project.');
+      } else {
+        console.error('Google Auth Error:', err);
+        setError(err.message || 'Identity verification sequence failed.');
+      }
     } finally {
       setLoading(false);
     }
